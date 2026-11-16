@@ -72,8 +72,7 @@ async function nextRoute(){
  if(generation!==routeGeneration)return;
  const coords=data.routes[0].geometry.coordinates.map(p=>({lat:p[1],lng:p[0]}));
  routePoints=interpolateRoute(coords);routeIndex=0;
- if(routeLine)map.removeLayer(routeLine);
- routeLine=L.polyline(coords,{color:'#8bd640',weight:4,opacity:.75,dashArray:'7 9'}).addTo(map);
+ if(routeLine){map.removeLayer(routeLine);routeLine=null;}
  setStatus('💚 Grinch hopping along mapped roads toward his next house stop (simulated).');
  }catch(e){
  if(generation===routeGeneration){setStatus('Road routing temporarily unavailable. Retrying…');routePoints=[]}
