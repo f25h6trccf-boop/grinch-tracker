@@ -16,7 +16,7 @@ body.night #snow{display:block}
 .flake{position:absolute;top:-20px;color:#d5eaff;animation:fall linear infinite;opacity:.65}
 @keyframes fall{to{transform:translateY(110vh)}}
 #sightings{max-height:240px;overflow:auto}#sightings p{padding:8px;border-bottom:1px solid #ffffff20;margin:0}
-</style></head><body><header><h1>🎄 Grinch Tracker</h1><div>GPS Neighborhood Edition</div></header><main class="wrap"><div class="panel"><strong>📍 Your neighborhood, your Grinch hunt</strong><p class="muted">Your position comes from your phone's GPS. The Grinch is fictional and his position is simulated for entertainment. Location is used in this browser only.</p><button id="locate">Enable GPS</button><button id="track" disabled>Start Grinch</button><button id="stop" disabled>Pause</button><button id="clearPins">Clear Pins</button><button id="nightToggle" aria-pressed="false">🌙 Night Mode</button><div id="status" aria-live="polite">Tap Enable GPS to begin.</div></div><div class="panel muted">📌 Tap anywhere on the map to set YOUR location. The Grinch remains simulated. Clear the pin to return to live GPS.</div><div id="map" aria-label="Interactive neighborhood map"></div>
+</style></head><body><header><h1>🎄 Grinch Tracker</h1><div>GPS Neighborhood Edition</div></header><main class="wrap"><div class="panel"><strong>📍 Your neighborhood, your Grinch hunt</strong><p class="muted">Your position comes from your phone's GPS. The Grinch is fictional and his position is simulated for entertainment. Location is used in this browser only.</p><button id="locate">Enable GPS</button><button id="clearPins">Clear Pins</button><button id="nightToggle" aria-pressed="false">🌙 Night Mode</button><div id="status" aria-live="polite">Tap Enable GPS to begin.</div></div><div class="panel muted">📌 Tap anywhere on the map to set YOUR location. The Grinch remains simulated. Clear the pin to return to live GPS.</div><div id="map" aria-label="Interactive neighborhood map"></div>
 <div id="visitEffect" aria-hidden="true">🏠🎁✨</div><div id="snow" aria-hidden="true"></div>
 <div class="panel radarrow"><div id="radar" role="img" aria-label="Simulated Grinch proximity radar"></div><div><strong>📡 Grinch Radar</strong><p id="radarText">Start tracking to scan for the Grinch.</p><label for="alertRange">Nearby alert distance:</label> <select id="alertRange"><option value="100">100 m</option><option value="250" selected>250 m</option><option value="500">500 m</option><option value="1000">1 km</option></select><p class="muted" style="font-size:12px">Alerts appear while this page is open.</p></div></div><div class="panel stats"><span id="distance">Grinch distance: —</span><span id="gifts">Presents recovered: 0 🎁</span><span id="countdown">Christmas countdown</span></div><div class="panel"><strong>🚨 Grinch sightings</strong><button id="clearHistory">Clear history</button><div id="sightings" aria-live="polite">No sightings yet.</div></div></main><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>
 const map=L.map('map').setView([39.5,-98.35],4);
@@ -74,8 +74,8 @@ function addSighting(message){
  renderHistory();
 }
 $('alertRange').onchange=()=>{alerted=false;updateDistance()};
-function setHome(lat,lng){home={lat,lng};if(!player)player=L.marker(home,{icon:meIcon}).addTo(map).bindPopup('Your GPS location');else player.setLatLng(home);map.setView(home,15);$('track').disabled=false;setStatus('GPS connected. Start the Grinch hunt!');updateDistance()}
-$('locate').onclick=()=>{if(!navigator.geolocation){setStatus('GPS is not supported by this browser.');return}setStatus('Requesting location permission…');if(watchId!==null)navigator.geolocation.clearWatch(watchId);watchId=navigator.geolocation.watchPosition(p=>{gpsLocation={lat:p.coords.latitude,lng:p.coords.longitude};if(!pinnedLocation)setHome(gpsLocation.lat,gpsLocation.lng);else setStatus('GPS connected. Your pinned location remains active.')},e=>setStatus('GPS unavailable: '+e.message+'. Open this app over HTTPS and allow location access.'),{enableHighAccuracy:true,maximumAge:10000,timeout:15000})};
+function setHome(lat,lng){home={lat,lng};if(!player)player=L.marker(home,{icon:meIcon}).addTo(map).bindPopup('Your GPS location');else player.setLatLng(home);map.setView(home,15);setStatus('Location ready. Grinch tracking runs automatically.');updateDistance();startTracking()}
+$('locate').onclick=()=>{if(!navigator.geolocation){setStatus('GPS is not supported by this browser.');return}setStatus('Requesting location permission…');if(watchId!==null)navigator.geolocation.clearWatch(watchId);watchId=navigator.geolocation.watchPosition(p=>{gpsLocation={lat:p.coords.latitude,lng:p.coords.longitude};if(!pinnedLocation)setHome(gpsLocation.lat,gpsLocation.lng);else {setStatus('GPS connected. Your pinned location remains active.');startTracking()}},e=>setStatus('GPS unavailable: '+e.message+'. Open this app over HTTPS and allow location access.'),{enableHighAccuracy:true,maximumAge:10000,timeout:15000})};
 
 let routePoints=[],routeIndex=0,houseStops=[],stopUntil=0,routeLine=null,routeLoading=false,routeGeneration=0;
 function moveGrinch(point){
@@ -137,17 +137,11 @@ function hop(){
  }
  }else nextRoute();
 }
-$('track').onclick=()=>{
+function startTracking(){
  if(timer||!home)return;
  routeGeneration++;routePoints=[];routeIndex=0;stopUntil=0;
- $('track').disabled=true;$('stop').disabled=false;
- setStatus('Finding roads and nearby buildings…');
+ setStatus('💚 Grinch tracking automatically. Finding nearby roads and houses…');
  nextRoute();timer=setInterval(hop,420);
-};
-$('stop').onclick=()=>{
- clearInterval(timer);timer=null;routeGeneration++;routeLoading=false;
- $('track').disabled=false;$('stop').disabled=true;
- setStatus('Grinch tracking paused.');
-};
-function countdown(){const now=new Date(),y=now.getFullYear(),target=new Date(y,11,25);if(now>=target)target.setFullYear(y+1);$('countdown').textContent='🎄 '+Math.ceil((target-now)/86400000)+' days until Christmas'}countdown();if(pinnedLocation)setHome(pinnedLocation.lat,pinnedLocation.lng);
+}
+function countdown(){const now=new Date(),y=now.getFullYear(),target=new Date(y,11,25);if(now>=target)target.setFullYear(y+1);$('countdown').textContent='🎄 '+Math.ceil((target-now)/86400000)+' days until Christmas'}countdown();if(pinnedLocation)setHome(pinnedLocation.lat,pinnedLocation.lng);else $('status').textContent='Waiting for GPS. Tap Enable GPS to grant permission.';
 </script></body></html>
