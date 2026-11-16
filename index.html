@@ -1,5 +1,24 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Grinch Tracker GPS</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>body{margin:0;background:#071d13;color:#fff;font-family:system-ui,sans-serif}header{padding:18px;background:#114c2b;text-align:center}h1{margin:0}p{line-height:1.4}.wrap{max-width:900px;margin:auto;padding:12px}#map{height:55vh;min-height:340px;border-radius:16px;overflow:hidden}button{padding:13px 17px;border:0;border-radius:12px;background:#d62828;color:white;font-size:16px;font-weight:700;margin:5px;cursor:pointer}button:disabled{opacity:.5}.panel{background:#16442c;border-radius:14px;padding:12px;margin:12px 0}.muted{color:#cce1d2}.stats{display:flex;gap:12px;flex-wrap:wrap}.stats span{background:#245c3c;padding:10px;border-radius:10px}.leaflet-container{color:#222} .grinch-face{animation:grinchHop .5s ease-in-out infinite alternate;filter:drop-shadow(0 2px 3px #111)}@keyframes grinchHop{from{transform:translateY(0)}to{transform:translateY(-9px)}} </style></head><body><header><h1>🎄 Grinch Tracker</h1><div>GPS Neighborhood Edition</div></header><main class="wrap"><div class="panel"><strong>📍 Your neighborhood, your Grinch hunt</strong><p class="muted">Your position comes from your phone's GPS. The Grinch is fictional and his position is simulated for entertainment. Location is used in this browser only.</p><button id="locate">Enable GPS</button><button id="track" disabled>Start Grinch</button><button id="stop" disabled>Pause</button><button id="clearPins">Clear Pins</button><div id="status" aria-live="polite">Tap Enable GPS to begin.</div></div><div class="panel muted">📌 Tap anywhere on the map to set YOUR location. The Grinch remains simulated. Clear the pin to return to live GPS.</div><div id="map" aria-label="Interactive neighborhood map"></div><div class="panel stats"><span id="distance">Grinch distance: —</span><span id="gifts">Presents recovered: 0 🎁</span><span id="countdown">Christmas countdown</span></div><div class="panel"><strong>🚨 Grinch sightings</strong><div id="sightings" aria-live="polite">No sightings yet.</div></div></main><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Grinch Tracker GPS</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>body{margin:0;background:#071d13;color:#fff;font-family:system-ui,sans-serif}header{padding:18px;background:#114c2b;text-align:center}h1{margin:0}p{line-height:1.4}.wrap{max-width:900px;margin:auto;padding:12px}#map{height:55vh;min-height:340px;border-radius:16px;overflow:hidden}button{padding:13px 17px;border:0;border-radius:12px;background:#d62828;color:white;font-size:16px;font-weight:700;margin:5px;cursor:pointer}button:disabled{opacity:.5}.panel{background:#16442c;border-radius:14px;padding:12px;margin:12px 0}.muted{color:#cce1d2}.stats{display:flex;gap:12px;flex-wrap:wrap}.stats span{background:#245c3c;padding:10px;border-radius:10px}.leaflet-container{color:#222} .grinch-face{animation:grinchHop .5s ease-in-out infinite alternate;filter:drop-shadow(0 2px 3px #111)}@keyframes grinchHop{from{transform:translateY(0)}to{transform:translateY(-9px)}} 
+body.night{background:#050d22}body.night header{background:#152449}body.night .panel{background:#162541}
+body.night .leaflet-tile-pane{filter:brightness(.55) saturate(.8) hue-rotate(15deg)}
+#radar{height:112px;width:112px;border-radius:50%;position:relative;background:repeating-radial-gradient(circle,#153c27 0 17px,#2d6844 18px 19px);border:2px solid #76d65d;overflow:hidden;flex-shrink:0}
+#radar:before{content:"";position:absolute;inset:0;background:conic-gradient(from 0deg,transparent 0deg,rgba(139,255,111,.6) 60deg,transparent 65deg);animation:sweep 3s linear infinite}
+#radar.fast:before{animation-duration:.8s}#radar.medium:before{animation-duration:1.7s}
+#radar:after{content:"💚";position:absolute;left:42px;top:39px;font-size:22px}
+@keyframes sweep{to{transform:rotate(360deg)}}
+.radarrow{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+#visitEffect{position:fixed;top:28%;left:50%;transform:translateX(-50%);z-index:2000;pointer-events:none;font-size:60px;opacity:0}
+#visitEffect.pop{animation:visitPop 1.8s ease-out}
+@keyframes visitPop{0%{opacity:0;transform:translate(-50%,25px) scale(.4)}25%{opacity:1;transform:translate(-50%,-20px) scale(1.4)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-65px) scale(.9)}}
+#snow{position:fixed;inset:0;pointer-events:none;z-index:1100;overflow:hidden;display:none}
+body.night #snow{display:block}
+.flake{position:absolute;top:-20px;color:#d5eaff;animation:fall linear infinite;opacity:.65}
+@keyframes fall{to{transform:translateY(110vh)}}
+#sightings{max-height:240px;overflow:auto}#sightings p{padding:8px;border-bottom:1px solid #ffffff20;margin:0}
+</style></head><body><header><h1>🎄 Grinch Tracker</h1><div>GPS Neighborhood Edition</div></header><main class="wrap"><div class="panel"><strong>📍 Your neighborhood, your Grinch hunt</strong><p class="muted">Your position comes from your phone's GPS. The Grinch is fictional and his position is simulated for entertainment. Location is used in this browser only.</p><button id="locate">Enable GPS</button><button id="track" disabled>Start Grinch</button><button id="stop" disabled>Pause</button><button id="clearPins">Clear Pins</button><button id="nightToggle" aria-pressed="false">🌙 Night Mode</button><div id="status" aria-live="polite">Tap Enable GPS to begin.</div></div><div class="panel muted">📌 Tap anywhere on the map to set YOUR location. The Grinch remains simulated. Clear the pin to return to live GPS.</div><div id="map" aria-label="Interactive neighborhood map"></div>
+<div id="visitEffect" aria-hidden="true">🏠🎁✨</div><div id="snow" aria-hidden="true"></div>
+<div class="panel radarrow"><div id="radar" role="img" aria-label="Simulated Grinch proximity radar"></div><div><strong>📡 Grinch Radar</strong><p id="radarText">Start tracking to scan for the Grinch.</p><label for="alertRange">Nearby alert distance:</label> <select id="alertRange"><option value="100">100 m</option><option value="250" selected>250 m</option><option value="500">500 m</option><option value="1000">1 km</option></select><p class="muted" style="font-size:12px">Alerts appear while this page is open.</p></div></div><div class="panel stats"><span id="distance">Grinch distance: —</span><span id="gifts">Presents recovered: 0 🎁</span><span id="countdown">Christmas countdown</span></div><div class="panel"><strong>🚨 Grinch sightings</strong><button id="clearHistory">Clear history</button><div id="sightings" aria-live="polite">No sightings yet.</div></div></main><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>
 const map=L.map('map').setView([39.5,-98.35],4);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
 const $=id=>document.getElementById(id);
@@ -21,11 +40,40 @@ $('clearPins').onclick=()=>{
 const meIcon=L.divIcon({html:'<div style="font-size:28px">📍</div>',className:'',iconSize:[32,32]});
 const grinchIcon=L.divIcon({html:'<div class="grinch-face" aria-label="Grinch face"><svg width="46" height="49" viewBox="0 0 46 49" xmlns="http://www.w3.org/2000/svg"><path d="M7 22Q0 10 12 8L15 3 22 9 31 2 34 10Q47 14 39 29Q42 42 23 46Q4 43 7 22Z" fill="#78c524" stroke="#23470e" stroke-width="2.5"/><path d="M9 19Q15 14 21 22Q28 13 37 18" fill="none" stroke="#31531b" stroke-width="3"/><path d="M12 23Q18 20 21 25Q16 29 12 23ZM25 25Q30 20 35 22Q33 29 25 25Z" fill="#ffdf55" stroke="#2d4a18" stroke-width="1.5"/><circle cx="18" cy="24" r="1.5"/><circle cx="29" cy="24" r="1.5"/><path d="M18 33Q25 41 34 31" fill="none" stroke="#254514" stroke-width="2.5" stroke-linecap="round"/><path d="M5 14Q14 3 33 10L38 14 35 6Q19 -5 8 7Z" fill="#c82424" stroke="#fff" stroke-width="2"/><circle cx="37" cy="13" r="5" fill="#fff"/></svg></div>',className:'',iconSize:[46,49],iconAnchor:[23,45]});
 let home=null,player=null,grinch=null,grinchPos=null,timer=null,watchId=null,gifts=0,alerted=false;
+let history=[];
+try{history=JSON.parse(localStorage.getItem('grinchSightingsV2')||'[]');if(!Array.isArray(history))history=[]}catch(e){history=[]}
+function renderHistory(){const box=$('sightings');box.replaceChildren();if(!history.length){box.textContent='No sightings yet.';return}history.forEach(h=>{const p=document.createElement('p');p.textContent=new Date(h.time).toLocaleString()+' — '+h.message;box.appendChild(p)})}
+renderHistory();
+$('clearHistory').onclick=()=>{history=[];try{localStorage.removeItem('grinchSightingsV2')}catch(e){}renderHistory()};
+let night=false;try{night=localStorage.getItem('grinchNight')==='true'}catch(e){}
+function applyNight(){document.body.classList.toggle('night',night);$('nightToggle').setAttribute('aria-pressed',String(night));$('nightToggle').textContent=night?'☀️ Day Mode':'🌙 Night Mode'}
+$('nightToggle').onclick=()=>{night=!night;try{localStorage.setItem('grinchNight',String(night))}catch(e){}applyNight()};
+applyNight();
+const snow=$('snow');for(let i=0;i<28;i++){const e=document.createElement('span');e.className='flake';e.textContent='❄';e.style.left=(i*37%100)+'%';e.style.animationDuration=(6+i%8)+'s';e.style.animationDelay=(-(i*7%13))+'s';e.style.fontSize=(9+i%12)+'px';snow.appendChild(e)}
+let lastAlertAt=0;
+function visitAnimation(){const el=$('visitEffect');el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');setTimeout(()=>el.classList.remove('pop'),1900)}
+
 const rad=x=>x*Math.PI/180;
 function meters(a,b){const dlat=rad(b.lat-a.lat),dlon=rad(b.lng-a.lng),q=Math.sin(dlat/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dlon/2)**2;return 6371000*2*Math.atan2(Math.sqrt(q),Math.sqrt(1-q))}
 function setStatus(t){$('status').textContent=t}
-function updateDistance(){if(!home||!grinchPos)return;const d=meters(home,grinchPos);$('distance').textContent='Grinch distance: '+Math.round(d)+' m';if(d<250&&!alerted){alerted=true;addSighting('⚠️ The Grinch is nearby!');}if(d>350)alerted=false}
-function addSighting(s){const el=document.createElement('p');el.textContent=new Date().toLocaleTimeString()+' — '+s;$('sightings').prepend(el);while($('sightings').children.length>8)$('sightings').lastChild.remove()}
+function updateDistance(){
+ if(!home||!grinchPos)return;
+ const d=meters(home,grinchPos),threshold=Number($('alertRange').value);
+ $('distance').textContent='Grinch distance: '+Math.round(d)+' m';
+ $('radar').className=d<threshold?'fast':d<threshold*2?'medium':'';
+ $('radarText').textContent=d<threshold?'🚨 GRINCH NEARBY! '+Math.round(d)+' m away':d<threshold*2?'⚠️ Getting closer — '+Math.round(d)+' m':'Scanning… '+Math.round(d)+' m away';
+ if(d<threshold&&!alerted){
+ alerted=true;lastAlertAt=Date.now();addSighting('🚨 Grinch nearby ('+Math.round(d)+' m, simulated)!');
+ if(navigator.vibrate)navigator.vibrate([150,80,150]);
+ }else if(d>threshold*1.4)alerted=false;
+}
+function addSighting(message){
+ history.unshift({time:Date.now(),message});
+ history=history.slice(0,100);
+ try{localStorage.setItem('grinchSightingsV2',JSON.stringify(history))}catch(e){}
+ renderHistory();
+}
+$('alertRange').onchange=()=>{alerted=false;updateDistance()};
 function setHome(lat,lng){home={lat,lng};if(!player)player=L.marker(home,{icon:meIcon}).addTo(map).bindPopup('Your GPS location');else player.setLatLng(home);map.setView(home,15);$('track').disabled=false;setStatus('GPS connected. Start the Grinch hunt!');updateDistance()}
 $('locate').onclick=()=>{if(!navigator.geolocation){setStatus('GPS is not supported by this browser.');return}setStatus('Requesting location permission…');if(watchId!==null)navigator.geolocation.clearWatch(watchId);watchId=navigator.geolocation.watchPosition(p=>{gpsLocation={lat:p.coords.latitude,lng:p.coords.longitude};if(!pinnedLocation)setHome(gpsLocation.lat,gpsLocation.lng);else setStatus('GPS connected. Your pinned location remains active.')},e=>setStatus('GPS unavailable: '+e.message+'. Open this app over HTTPS and allow location access.'),{enableHighAccuracy:true,maximumAge:10000,timeout:15000})};
 
@@ -83,7 +131,7 @@ function hop(){
  if(routeIndex<routePoints.length){
  moveGrinch(routePoints[routeIndex++]);
  if(routeIndex===routePoints.length){
- gifts++;$('gifts').textContent='Presents recovered: '+gifts+' 🎁';
+ gifts++;$('gifts').textContent='Presents recovered: '+gifts+' 🎁';visitAnimation();
  addSighting('🏠 Grinch made a simulated house stop!');
  stopUntil=Date.now()+2200;
  }
